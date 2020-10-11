@@ -1,0 +1,31 @@
+#!/bin/bash
+
+function ctrl_c()
+{
+	cleanup
+	exit 2
+}
+
+function cleanup()
+{
+	pkill droidcam-cli
+	adb shell am force-stop com.dev47apps.droidcam
+}
+
+function start()
+{
+	adb shell dumpsys input_method | grep mInteractive=true &> /dev/null
+	is_screen_off=$?
+	if [ $is_screen_off -eq 1 ]; then
+		adb shell input keyevent 26
+	fi
+	sleep 2
+	adb shell monkey -p com.dev47apps.droidcam -c android.intent.category.LAUNCHER 1
+	sleep 3
+	droidcam-cli -v adb 4747	
+}
+
+trap "ctrl_c" 2
+
+cleanup
+start
